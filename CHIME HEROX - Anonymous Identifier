@@ -1,0 +1,96 @@
+CHIME HEROX - Anonymous Identifier
+
+1) TABLE OF CONTENTS
+
+2) SIMPLE, FAST PATIENT ENROLLMENT
+The Anonymous Identifier Solution provides for patient enrollment through the same or similar methods to those presently used to enroll in health insurance or check in at a health care point of service. No new methods need to be introduced to establish patient identity at the point where patient identity documents are collected/reviewed. With respect to enrollment (as well as validation), the Solution achieves peak effectiveness with standardized, uniformly applied processes and regulations regarding which identify documents and data are used to establish identity for each case. An initially proposed set of documents to be used would be:
+* US Citizens: 
+	* Drivers License or State ID: Name, Address, DOB, and document number
+	* Social Security Number
+	* Health Insurance: Unique Member/Subscriber ID number
+* Non US Citizens:
+	* Permanent Residents: 
+		* Green Card: Name, Address and document number
+		* Social Security Number
+		* Health Insurance: Unique Member/Subscriber ID number
+	* Non-Immigrant, Non US Citizens:
+		* Passport: Name, DOB and document number
+		* National ID of country of origin: Name, Address, DOB and document number
+		* Health Insurance: Unique Member/Subscriber ID number (Traveler's Insurance)
+Note: These document sets are generally used by US health providers today in non-emergency scenarios in enrollment and providing service. 
+What is critical to the Solution is that a consistent set of documents are used for each category of patient, regardless of point of care. 
+Upon enrollment, at the point where enrollment takes place, the patient's Anonymous Identifier would be generated and stored by the enrolling agency. 
+
+3) SIMPLE, FAST, ACCURATE IDENTIFICTATION
+The Anonymous Identifier Solution provides for identification in a highly simplified, fast and accurate fashion, through reliably generating a UUID set for all health care provider parties' identities, specifically for patient identity and patient records, whilst including authorized visitors, those authorized to take decisions on behalf of the patient, et al. - i.e. patient parties. All patients and patient parties in the provider ecosystem can be identified using the Solution, and mapped to how they are related or interact with a patient. 
+The UUID set is to be used and shared internally amongst health care providers. These providers key patient records, as well as any provider role/entity - i.e. patient party - interacting with a patient(s), using this UUID set as the primary identification mechanism.
+The power of the Solution is in its consistent generation and validation of this UUID set using a consistent set of patient (or patient party) identity documentation data - i.e. patient identity inputs - which assure that regardless of the point of service, the same UUID set can be generated and validated for the same inputs; and b) its overall simplicity and minimalism. Providers need only be equipped to generate the UUID set at the points of enrollment and service, and to adopt the use of the UUID set as the unique identifier for patient identity and records. The UUID set is completely opaque to patients themselves, patients never need see or interact with the UUID set - it is for health care provider eyes only. 
+This is achieved through:
+	a) An algorithm for producing randomly- and idempotently-generated UUID set which is completely anonymized and non-redundant
+	b) Algorithms for normalizing variances in patient identity inputs, such as address and document numbers, to assure consistent inputs to the generation of the Anonymous Identifier UUID set
+	c) Algorithms for normalizing NULLs in patient identity inputs, such as Social Security Number, for validiating patient intake under emergency scenarios (where complete patient identity inputs may not be available)
+	d) One way mappings of this UUID set to all sensitive patient information, including those governed by the Health Insurance Portability and Accountability Act of 1996 (HIPAA) and Personally identifiable information (PII) regulations
+	e) One way mappings of this UUID set to all UUID sets identifying parties authorized to visit or take decisions for the patient. 
+	f) An algorithm for obfuscation in the UUID set generation process which prevents reverse engineering
+	g) Policies in enforcing consistent use of patient identity inputs to assure the same inputs are used at all points of service
+	h) Policies in enforcing consistent validation and verification of patient identity inputs to assure veracity of inputs (this is already widely practised in most of North America)
+When an enrolled patient visits a provider, they need only provide the same set of independent patient identity inputs at the point of service. The provider then validates patient identity to the UUID set using those inputs. Since generation and validation are 100% reliable and accurate based on the same patient identity inputs, any provider will always be able to identify the patient correctly to the patient's UUID set. Beyond the technology implementation and adoption of the UUID set as the key for all patient records across providers, all that is required is for all proviers to consistently use the same patient identity inputs for each category of patient (i.e. US Citizen, US Permanent Resident, US Non-Immigrant Tourist/Visitor). 
+
+User Stories:
+i) Pt. John Smith calls hospital X in another state to get his records forwarded. We have to have a system that guarantees the John Smith whose records are sent are the John Smith asking for them. Pt. John Smith identifies himself to hospital X using his consistent patient identity inputs. Hospital X is able to accurately identify Pt. John Smith based on the UUID set that is validated based on those patient identity inputs.  
+
+ii) Pt. John Smith is intubated in an ICU and is about to get a blood transfusion. We need to ensure the blood was prepared for the correct John Smith. When Pt. John Smith is admitted to the ICU, his identify is validated to his UUID set based on his available patient identity inputs. 
+
+iii) Pt. John Smith is checking in for his daughter, Jane Smith, at the Pediatrician's office. We need to ensure the chart for the correct Jane Smith is opened in the computer. Pt. John Smith is validated s the correct John Smith related to the correct Jane Smith validating with Pt. John Smith's patient identity inputs and their mapping to the correct Jane Smith's identity inputs. 
+
+iv) A lab receives a specimen labeled, John Smith. We need to make sure the specimen is always associated with the correct John Smith and that the results are associated with the correct John Smith in the electronic health record. The specimen is anonymously and opaquely keyed to the correct John Smith's UUID set and this resolvable to the correct John Smith in the EHR, itself keyed to the correct John Smith's UUID set. 
+
+v)
+
+vi)
+
+vii)
+
+viii)
+
+ix)
+
+x)
+
+
+4) SECURITY AND FRAUD MANAGEMENT
+The Anonymous Identifier Solution ensures the security of patient (and patient party) information and protects against fraud by
+a) Anonymity and obfuscation: The UUID set is completely anonymous and can only be generated and validated to patient identity inputs. The UUID set does not expose patient identity inputs and cannot be reverse engineered. Together with this, having the UUID set only shared and used by providers, generated and validated only using patient identity inputs, and never exposed to third parties outside the provider ecosystem, the UUID set thus remains entirely anonymous. 
+This prevents the identification from compromise and the need for replacement, prevents patient identity inputs from being used for non-health purposes, renders theft and impersonation nearly impossible. Since identity is established and validated/verified at any and all points of service, and the UUID set is completely anonymized and obfuscated, the UUID set cannot itself be used to steal or impersonate patient identity, does not need replacement, and cannot be compromised. 
+b) Secure: The Solution provides for encryption and security of the UUID set generation and validation process to ensure that the algorithms cannot be suborned/subverted during the process. Thus the mechanics of generating and validating UUID sets is locked down and accessible only to authenticated and authorized parties. 
+Together with a), this assures security of the generation and validation of the UUID set itself. 
+c) Error Detection and Correction: The Solution relies on the use of Hamming codes to provide parity bits for data bit sets to identify errors and where the errors occur. 
+d) Idempotent: The UUID set is completely idempotent and is reliably and accurately generated and validated to patient identity inputs. The patient can monitor activity through authenticating by providing patient identity inputs, and all providers can ensure correct patient identification using these patient identity inputs. The idempotency of the UUID set simplifies the process for error detection and correction, making c) a feasible and foolproof approach to data integrity. 
+Together with a), b), and c) this assures data integrity and security at all points of interaction with the UUID set. 
+
+5) SUPPORT FOR PRIVACY AND ANONYMITY
+The Anonymous Identifier Solution is inherently anonymous and decoupled from sensitive information. The only method to access patient information using the Solution is via the UUID set. The UUID set can only be generated and/or validated using a consistent and complete set of patient identity inputs. 
+
+6) SCALABILITY
+The Anonymous Identifier Solution scales principally through its idempotency and the structure of the UUID set to assure uniqueness. Each of the UUIDs in the UUID set is a 128-bit value, and the use of a set of UUIDs prevents the possibility of hash collision. The number of possible UUIDs is 16^32 or 2^128, which is multiple orders of magnitude greater than the global population today, global population projections for the next 120 years, or any global population that can sustainably supported on earth.  
+The Solution is able to handle the US population through *consistent* application of sourcing patient identity inputs. 
+
+7) ADOPTABILITY
+The Anonymous Identifier Solution requires three key steps by stakeholders in the US. These steps are the adoption and application of consistent and rigorous policies for collecting and verifying patient (and patient party) identity inputs, the adoption of the UUID set as the patient (and patient party) identification key in provider systems of record, including patient EHRs, and the adoption of the Solution technology for enrollment and valiation at provider points of enrollment/service. 
+There is no need to transfer data from platform to platform. The only data change that is required is the adoption of the UUID set as the patient and patient party identifier key (in place of provider/agency specific identifiers/keys, such as Social Security Number).
+Providers, state and federal entities, and IT systems need only add or convert the key values for patient and patient party identity to use the UUID set.  
+Participation amongst patients is driven by generation of and validation to the UUID set by the provider at point of enrollment and point of service. Patients and patient parties never see this UUID set, and do not need to alter any behaviour other than providing a consistent set of patient identity inputs. 
+Participation amongst providers and the provider ecosystem (payers, EHR vendors, agencies, etc.) through its simplicity. Providers and the provider ecosystem need only apply consistent and rigorous policies for collecting and verifying patient (and patient party) identity inputs, the apply the UUID set as the patient (and patient party) identification key in provider systems of record, including patient EHRs, and deploy of the Solution technology for enrollment and valiation at provider points of enrollment/service. The Solution technology itself is minimalistic and technologically low-footprint (essentially equivalent to a mobile social networking application in size and privileges), easing this process. 
+
+8) IMPLEMENTATION
+The Anonymous Identifier Solution is to be implemented as four rollouts:
+a) Rolling out patient identity inputs policies 
+b) Rolling out the Solution technology 
+c) Rolling out the adoption of the UUID set as the patient identifier key in electronic health records
+d) Rolling out the adoption of the UUID set as the patient party identifier key in health provider systems 
+
+
+9) OTHER VALUABLE FEATURES AND FUNCTIONALITY
+
+
+10) LIST OF CITED REFERENCES AND ATTACHMENTS

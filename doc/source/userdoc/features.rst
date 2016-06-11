@@ -92,10 +92,9 @@ documentation.
 Distributed Mode
 ----------------
 
-The :doc:`installation.guide` suggests launching sahara as a single
-``sahara-all`` process. It is also possible to run sahara in distributed
-mode with ``sahara-api`` and ``sahara-engine`` processes running on several
-machines simultaneously. Running in distributed mode allows sahara to
+The :doc:`installation.guide` suggests launching sahara in distributed mode
+with ``sahara-api`` and ``sahara-engine`` processes potentially running on
+several machines simultaneously. Running in distributed mode allows sahara to
 offload intensive tasks to the engine processes while keeping the API
 process free to handle requests.
 
@@ -257,7 +256,7 @@ There are 2 types of string currently supported:
 
 * ``%JOB_EXEC_ID%`` - this string will be replaced with the job execution ID.
 * ``%RANDSTR(len)%`` - this string will be replaced with random string of
-  lowercase letters of length ``len``.
+  lowercase letters of length ``len``. ``len`` must be less than 1024.
 
 After placeholders are replaced, the real URLs are stored in the
 ``data_source_urls`` field of the job execution object. This is used later to

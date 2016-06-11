@@ -1,0 +1,68 @@
+CHIME HEROX - Proposa Guidelines
+
+1) TABLE OF CONTENTS
+
+2) SIMPLE, FAST PATIENT ENROLLMENT
+
+Describe how your Solution provides enrollment (when a patient is new to your Solution) that is simple and fast for both patients and providers.  Make sure to address the following:
+How are adult and child patients, including Non-US Citizens, enrolled to use your solution?  For each of the forms of authentication used to confirm their identity, please indicate whether they are royalty-free and/or proprietary.
+How does your solution minimize errors in enrollment? 
+How are updates and corrections to identification data made, including who can make them, how the corrections are validated, and how changes are communicated to relevant individuals and systems.
+What barriers to using your solution might some patients and/or providers have?  How does your solution resolve these barriers?  For example, if your solution normally requires verification through text or email and a patient does not have either of these, how is this handled?
+Describe what situations would fall outside of your standard process and how you enroll patients in these cases.  For example, if you use fingerprints as a biometrics and a patient’s hands are burned, how are they identified?
+Concept Phase Only:
+Provide a time estimate for conducting adult, children, and non-standard enrollments and a rationale for your estimates.
+What do you estimate the error rate will be and why?
+Use cases: Provide between 10 and 100 use cases for enrollment that test typical scenarios, more complicated scenarios, and the boundaries of what your solution can handle.
+3) SIMPLE, FAST, ACCURATE IDENTIFICATION
+
+Describe how your Solution provides simple, fast, accurate identification of patients at the “point of care” -- when they enter the healthcare system to see a provider.  Make sure to address the following:
+When an enrolled patient visits a provider, how will the patient be identified?
+Concept Phase Only:
+What is your estimate of how much time identification will take and why?
+How accurate will your solution be and how will this accuracy be achieved?  Specify accuracy in terms of % of false negatives and % of false positives.  Provide separate accuracy projections if accuracy will be significantly different for various groups (eg. adults versus children, emergency versus non-emergency, etc.).
+Use cases: Provide between 10 and 100 use cases for identification that test typical scenarios, more complicated scenarios, and the boundaries of what your solution can handle.
+
+4) SECURITY AND FRAUD MANAGEMENT
+
+Describe how your Solution ensures the security of patient information and protects against fraud. Make sure to address the following:
+How does your solution allow the patient to monitor activity?
+How is identification replaced if it has been compromised in any way? 
+How does your solution protect against usage for non–health purposes?
+How does your solution prevent theft of national patient identification to receive treatment, impersonation of someone else, or theft of a patient’s financial records?
+How does the system protect data integrity and security for faults occurring during the writing and transferring of data?
+Concept Phase Only:
+Use cases: Provide between 20 and 100 use cases for security and fraud risks that test typical scenarios, more complicated scenarios, and the boundaries of what your solution can handle.
+5) SUPPORT FOR PRIVACY AND ANONYMITY 
+
+Describe how your Solution supports privacy and anonymity for patients.  Make sure to address the following:
+How does your solution maintain up-to-date privacy settings based on national and state standards?
+How does your solution go beyond national and state standards to enable individuals to set and update detailed privacy settings (e.g., which providers can see which portions of their health record)? 
+How do you protect patients’ privacy settings? (eg. cryptographic keys or other means)
+6) SCALABILITY
+
+Describe how your Solution can be scaled to serve the entire U.S. population and visitors to the U.S.  Make sure to address the following:
+How will every user for the next 120 years have a unique identifier?
+What % of the US population do you estimate can be handled by your solution? 
+How is your solution able to handle the entire US population, regardless of culture; gender; language spoken; physical, mental or emotional challenge; educational ability and illiteracy; socioeconomic level; and access to and familiarity with electronic devices?  For any subgroups that would be challenging for your solution, please describe why and how your solution mitigates this challenge.
+How is your solution able to handle visitors to the US? Describe any exceptions.
+How will your solution maintain high speed, security, and accuracy as it expands from initial implementation enrollment level to full implementation of the entire US population and visitors who access healthcare?
+7) ADOPTABILITY
+
+Describe how and why your Solution will be adopted by the majority of stakeholders in the U.S.  Make sure to address the following:
+How does your solution transfer data to other software platforms?  How is your solution modified to meet future standards in data transfer? 
+What standards does your solution use and how is the solution upgraded as standards change?
+What will state and federal entities (eg. Medicare, Medicaid, V.A.) need to modify to use your solution? Note: consider ease of modification to their systems, adherence to state and federal requirements, etc.
+How will IT systems (such as electronic health records, practice management systems, regional health exchange systems, payer systems) need to be modified in order to use your solution? 
+Why will your solution cause a high percentage of patients of all types to participate compared with other possible solutions?
+Why will your solution cause a high percentage of non-patient entities (such as payers, providers, EHR vendors, etc.) to adopt your solution?
+8) IMPLEMENTATION
+
+Describe how you envision your Solution being initiated and then rolled out across the U.S.  Make sure to address the following:
+What are the stages, milestones, and timeline for a full U.S. implementation?
+What is your estimate of the total cost for a full U.S. implementation over a five-year period? 
+Who do you envision bearing this cost, and what is the rationale for thinking that this plan will work?
+9) OTHER VALUABLE FEATURES AND FUNCTIONALITY
+
+Describe any other value-added features or functionality that make your Solution the best national patient identifier solution.
+10) LIST OF CITED REFERENCES AND ATTACHMENTS

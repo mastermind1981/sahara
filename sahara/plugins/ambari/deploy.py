@@ -22,6 +22,7 @@ from oslo_utils import uuidutils
 
 from sahara import conductor
 from sahara import context
+from sahara.i18n import _LW
 from sahara.plugins.ambari import client as ambari_client
 from sahara.plugins.ambari import common as p_common
 from sahara.plugins.ambari import configs
@@ -54,7 +55,9 @@ def setup_ambari(cluster):
         sudo = functools.partial(r.execute_command, run_as_root=True)
         sudo("ambari-server setup -s -j"
              " `cut -f2 -d \"=\" /etc/profile.d/99-java.sh`", timeout=1800)
-        sudo("service ambari-server start")
+        redirect_file = "/tmp/%s" % uuidutils.generate_uuid()
+        sudo("service ambari-server start >{rfile} && "
+             "cat {rfile} && rm {rfile}".format(rfile=redirect_file))
     LOG.debug("Ambari management console installed")
 
 
@@ -151,6 +154,19 @@ def _prepare_ranger(cluster):
         sudo("rm /tmp/init.sql")
 
 
+def prepare_hive(cluster):
+    hive = plugin_utils.get_instance(cluster, p_common.HIVE_SERVER)
+    if not hive:
+        return
+    with hive.remote() as r:
+        r.execute_command(
+            'sudo su - -c  "hadoop fs -mkdir /user/oozie/conf" hdfs')
+        r.execute_command(
+            'sudo su - -c  "hadoop fs -copyFromLocal '
+            '/etc/hive/conf/hive-site.xml '
+            '/user/oozie/conf/hive-site.xml" hdfs')
+
+
 def update_default_ambari_password(cluster):
     ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
     new_password = uuidutils.generate_uuid()
@@ -164,9 +180,7 @@ def update_default_ambari_password(cluster):
 
 
 def wait_host_registration(cluster, instances):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         kwargs = {"client": client, "instances": instances}
         poll_utils.poll(_check_host_registration, kwargs=kwargs, timeout=600)
 
@@ -186,10 +200,9 @@ def set_up_hdp_repos(cluster):
     if not hdp_repo and not hdp_utils_repo:
         return
     ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
     pv = cluster.hadoop_version
     repos = repo_id_map[pv]
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         os_type = os_type_map[client.get_host_info(ambari.fqdn())["os_type"]]
         if hdp_repo:
             client.set_up_mirror(pv, os_type, repos["HDP"], hdp_repo)
@@ -222,8 +235,6 @@ def create_blueprint(cluster):
         "host_groups": host_groups,
         "configurations": configs.get_cluster_params(cluster)
     }
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
 
     general_configs = cluster.cluster_configs.get("general", {})
     if (general_configs.get(p_common.NAMENODE_HA) or
@@ -240,7 +251,7 @@ def create_blueprint(cluster):
     if general_configs.get(p_common.HBASE_REGIONSERVER_HA):
         bp = ha_helper.update_bp_for_hbase_ha(cluster, bp)
 
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         return client.create_blueprint(cluster.name, bp)
 
 
@@ -261,37 +272,28 @@ def _build_ambari_cluster_template(cluster):
 
 def start_cluster(cluster):
     ambari_template = _build_ambari_cluster_template(cluster)
-
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         req_id = client.create_cluster(cluster.name, ambari_template)["id"]
         client.wait_ambari_request(req_id, cluster.name)
 
 
 def add_new_hosts(cluster, instances):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         for inst in instances:
             client.add_host_to_cluster(inst)
 
 
 def manage_config_groups(cluster, instances):
     groups = []
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
     for instance in instances:
         groups.extend(configs.get_config_group(instance))
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         client.create_config_group(cluster, groups)
 
 
 def manage_host_components(cluster, instances):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
     requests_ids = []
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         clients = p_common.get_clients(cluster)
         for instance in instances:
             services = p_common.get_ambari_proc_list(instance.node_group)
@@ -329,19 +331,39 @@ def decommission_hosts(cluster, instances):
 
 
 def decommission_nodemanagers(cluster, instances):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         client.decommission_nodemanagers(cluster.name, instances)
 
 
 def decommission_datanodes(cluster, instances):
+    with _get_ambari_client(cluster) as client:
+        client.decommission_datanodes(cluster.name, instances)
+
+
+def restart_namenode(cluster, instance):
     ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
     password = cluster.extra["ambari_password"]
 
     with ambari_client.AmbariClient(ambari, password=password) as client:
-        client.decommission_datanodes(cluster.name, instances)
+        client.restart_namenode(cluster.name, instance)
+
+
+def restart_resourcemanager(cluster, instance):
+    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
+    password = cluster.extra["ambari_password"]
+
+    with ambari_client.AmbariClient(ambari, password=password) as client:
+        client.restart_resourcemanager(cluster.name, instance)
+
+
+def restart_nns_and_rms(cluster):
+    nns = plugin_utils.get_instances(cluster, p_common.NAMENODE)
+    for nn in nns:
+        restart_namenode(cluster, nn)
+
+    rms = plugin_utils.get_instances(cluster, p_common.RESOURCEMANAGER)
+    for rm in rms:
+        restart_resourcemanager(cluster, rm)
 
 
 def remove_services_from_hosts(cluster, instances):
@@ -353,10 +375,7 @@ def remove_services_from_hosts(cluster, instances):
 
 
 def _remove_services_from_host(cluster, instance):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         hdp_processes = client.list_host_processes(cluster.name, instance)
         for proc in hdp_processes:
             LOG.debug("Stopping process %s on host %s " %
@@ -371,20 +390,45 @@ def _remove_services_from_host(cluster, instance):
 
 
 def _remove_host(cluster, inst):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         client.delete_host(cluster.name, inst)
 
 
 def _wait_all_processes_removed(cluster, instance):
-    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
-    password = cluster.extra["ambari_password"]
-
-    with ambari_client.AmbariClient(ambari, password=password) as client:
+    with _get_ambari_client(cluster) as client:
         while True:
             hdp_processes = client.list_host_processes(cluster.name, instance)
             if not hdp_processes:
                 return
             context.sleep(5)
+
+
+def _get_ambari_client(cluster):
+    ambari = plugin_utils.get_instance(cluster, p_common.AMBARI_SERVER)
+    password = cluster.extra["ambari_password"]
+    return ambari_client.AmbariClient(ambari, password=password)
+
+
+def add_hadoop_swift_jar(instances):
+    new_jar = "/opt/hadoop-openstack.jar"
+    for inst in instances:
+        with inst.remote() as r:
+            code, out = r.execute_command("test -f %s" % new_jar,
+                                          raise_when_error=False)
+            if code == 0:
+                # get ambari hadoop version (e.g.: 2.7.1.2.3.4.0-3485)
+                code, amb_hadoop_version = r.execute_command(
+                    "sudo hadoop version | grep 'Hadoop' | awk '{print $2}'")
+                amb_hadoop_version = amb_hadoop_version.strip()
+                # get special code of ambari hadoop version(e.g.:2.3.4.0-3485)
+                amb_code = '.'.join(amb_hadoop_version.split('.')[3:])
+                origin_jar = (
+                    "/usr/hdp/%s/hadoop-mapreduce/hadoop-openstack-%s.jar" % (
+                        amb_code, amb_hadoop_version))
+                r.execute_command("sudo cp %s %s" % (new_jar, origin_jar))
+            else:
+                LOG.warning(_LW("The {jar_file} file cannot be found "
+                                "in the {dir} directory so Keystone API v3 "
+                                "is not enabled for this cluster.")
+                            .format(jar_file="hadoop-openstack.jar",
+                                    dir="/opt"))

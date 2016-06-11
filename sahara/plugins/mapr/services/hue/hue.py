@@ -34,6 +34,7 @@ import sahara.plugins.mapr.services.spark.spark as spark
 import sahara.plugins.mapr.services.sqoop.sqoop2 as sqoop
 import sahara.plugins.mapr.services.yarn.yarn as yarn
 import sahara.plugins.mapr.util.general as g
+import sahara.plugins.mapr.util.password_utils as pu
 from sahara.plugins.mapr.util import service_utils as su
 import sahara.plugins.mapr.util.validation_utils as vu
 import sahara.plugins.provisioning as p
@@ -74,12 +75,20 @@ class Hue(s.Service):
         self._name = 'hue'
         self._ui_name = 'Hue'
         self._node_processes = [HUE]
-        self._ui_info = [('HUE', HUE, 'http://%s:8888')]
+        self._ui_info = None
         self._validation_rules = [
             vu.exactly(1, HUE),
             vu.on_same_node(HUE, httpfs.HTTP_FS),
+            vu.on_same_node(HUE_LIVY, spark.SPARK_SLAVE),
         ]
         self._priority = 2
+
+    def get_ui_info(self, cluster_context):
+        # Hue uses credentials of the administrative user (PAM auth)
+        return [('HUE', HUE, {s.SERVICE_UI: 'http://%s:8888',
+                              'Username': pu.MAPR_USER_NAME,
+                              'Password': pu.get_mapr_password(cluster_context
+                                                               .cluster)})]
 
     def get_configs(self):
         return [Hue.THRIFT_VERSION]
@@ -113,7 +122,7 @@ class Hue(s.Service):
 
         return [hue_ini, hue_sh]
 
-    def _get_packages(self, node_processes):
+    def _get_packages(self, cluster_context, node_processes):
         result = []
 
         result += self.dependencies
@@ -146,9 +155,9 @@ class Hue(s.Service):
             'secret_key': self._generate_secret_key()
         }
 
-        hive_host = context.get_instance(hive.HIVE_METASTORE)
+        hive_host = context.get_instance(hive.HIVE_SERVER_2)
         if hive_host:
-            hive_service = context.get_service(hive.HIVE_METASTORE)
+            hive_service = context.get_service(hive.HIVE_SERVER_2)
             result.update({
                 'hive_host': hive_host.internal_ip,
                 'hive_version': hive_service.version,
@@ -199,6 +208,12 @@ class Hue(s.Service):
                 set_owner(r)
             self._copy_hive_configs(cluster_context, hue_instance)
             self._install_jt_plugin(cluster_context, hue_instance)
+
+        hue_livy_instance = cluster_context.get_instance(HUE_LIVY)
+        if hue_livy_instance:
+            with hue_livy_instance.remote() as r:
+                LOG.debug("Changing Hue home dir owner")
+                set_owner(r)
 
     def _set_hue_sh_chmod(self, cluster_context):
         cmd = 'chmod 777 %s' % (self.home_dir(cluster_context) + '/bin/hue.sh')
